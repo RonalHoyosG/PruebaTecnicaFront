@@ -1,0 +1,9 @@
+<aside class="sidebar">
+    <ul class="sidebar_items">
+        <li *ngFor="let item of menu" class="sidebar_items_list" routerLinkActive="active">
+            <a [routerLink]="item.path"  class="sidebar_nav_item"> 
+               <p>{{item.title}} </p>
+            </a>
+        </li>
+    </ul>
+</aside>

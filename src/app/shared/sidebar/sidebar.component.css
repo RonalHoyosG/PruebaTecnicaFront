@@ -1,0 +1,38 @@
+.sidebar{
+    grid-area: sidebar;
+}
+
+li {
+    float: left;
+    padding: 10px 10px;
+}
+
+.sidebar ul li{
+    list-style: none;
+    text-decoration: none;
+    color: #303030;
+}
+
+a{
+    list-style: none;
+    text-decoration: none;
+    color: #303030;
+    display: flex;
+    column-gap: 14px;
+}
+
+.sidebar .sidebar_items_list:hover{
+    background: #aaa7a790;
+    cursor: pointer;  
+}
+
+.active{
+    background: #cac3c390;
+    border-left: 4px solid #000000;  
+}
+
+@media (min-width: 600px) {
+    li {
+        float: none;
+    }
+}
