@@ -1,0 +1,20 @@
+<div id="delete" class="modal" [ngClass]="{
+    'modalShow': visible === true,
+    'modalHide': visible === false}">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="custom-alert">
+            <div class="custom-alert-title">
+                <h2>{{title}}</h2>
+            </div>
+
+            <div class="custom-alert-body">
+                <p>{{message}}</p>
+            </div>
+            <div class="custom-alert-buttons">
+                <button class="button" (click)="cancelHandler()">Cancelar</button>
+                <button class="button-primary" (click)="acceptHandler()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>

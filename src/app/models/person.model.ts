@@ -4,7 +4,7 @@ export class Person {
         public names: string,
         public gender: string,
         public age: string,
-        public identification: string,
+        public identification: number,
         public address: string,
         public phone: string
     ){}

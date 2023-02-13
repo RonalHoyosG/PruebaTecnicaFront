@@ -1,1 +1,105 @@
-<p>cuentas works!</p>
+<div>
+    <h2>Cuentas</h2>
+    <input class="input" type="text" placeholder="Buscar" (keyup.enter)="this.loadAccounts( txtFilter.value )"
+        #txtFilter />
+</div>
+
+<div class="container-new">
+    <button (click)="showNew()">Nueva Cuenta</button>
+    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData" ></app-pdf>
+</div>
+
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>Cuenta</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Saldo Inicial</th>
+            <th>Saldo Actual</th>
+            <th>Cliente</th>
+            <th>Identificación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        <tr *ngFor="let account of accounts">
+            <td>{{ account.accountNumber }}</td>
+            <td>{{ account.type }}</td>
+            <td>{{ account.status?'True':'False' }}</td>
+            <td>{{ account.initialBalance }}</td>
+            <td>{{ account.balance }}</td>
+            <td>{{ account.clientName }}</td>
+            <td>{{ account.clientIdentification }}</td>
+            
+            <td>
+                <button class="btn-action" (click)="showEdit(account)">✏️</button>
+                <button class="btn-action" (click)="showDelete(account)">❌</button>
+            </td>
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div id="create" class="modal" [ngClass]="{
+    'modalShow': state === 'new' || state === 'edit',
+    'modalHide': state === 'show' || state === 'delete'
+}">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close" (click)="modalHide()">&times;</span>
+        <div>
+            <h3>{{state==='edit'?'Editar cuenta':'Crear cuenta'}}</h3>
+            <br />
+            <form (ngSubmit)="save()" autocomplete="off" [formGroup]="miFormulario">
+
+                <label for="names">Cliente:*</label>
+                <div>
+                    <select class="input" formControlName="clientId" (change)="changeClient()">
+                        <option *ngFor="let client of clients" [value]="client">{{client.person.names}}</option>
+                    </select>
+                    <span class="spanError" *ngIf="hasError('clientId')">
+                        Cliente es requerido
+                    </span>
+                </div>
+
+                <label for="accountNumber">Número cuenta:*</label>
+                <div>
+                    <input class="input" type="number" formControlName="accountNumber" placeholder="Número cuenta">
+                    <span class="spanError" *ngIf="hasError('accountNumber')">
+                        Cuenta es requerida debe tenar minimo 8 caracteres
+                    </span>
+                </div>
+
+                <label for="type">Tipo:*</label>
+                <div>
+                    <select class="input" formControlName="type" id="type">
+                        <option value="Ahorros">Ahorros</option>
+                        <option value="Corriente">Corriente</option>
+                    </select>
+                    <span class="spanError" *ngIf="hasError('type')">
+                        Genero es requerido
+                    </span>
+                </div>
+
+                <label for="initialBalance">Saldo inicial:*</label>
+                <div>
+                    <input class="input" type="number" formControlName="initialBalance" placeholder="initialBalance">
+                    <span class="spanError" *ngIf="hasError('initialBalance')">
+                        Saldo es requerida debe ser mayor a 100
+                    </span>
+                </div>
+
+                <label for="status">Estado</label>
+                <input class="checkBox " type="checkbox" formControlName="status" placeholder="Estado">
+
+                <input class="input" type="submit" value="Guardar">
+            </form>
+        </div>
+    </div>
+</div>
+<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()" (accept)="delete()"></app-confirm>

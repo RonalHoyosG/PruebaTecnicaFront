@@ -1,12 +1,12 @@
 <div>
     <h2>Clientes</h2>
-    <input type="text" placeholder="Buscar" placeholder="Buscar"
-    (keyup.enter)="this.loadClients( txtFilter.value )"
-    #txtFilter
-    />
+    <input class="input" type="text" placeholder="Buscar" (keyup.enter)="this.loadClients( txtFilter.value )"
+        #txtFilter />
 </div>
+
 <div class="container-new">
     <button (click)="showNew()">Nuevo Cliente</button>
+    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData" ></app-pdf>
 </div>
 
 <table class="styled-table">
@@ -20,7 +20,9 @@
             <th>Acciones</th>
         </tr>
     </thead>
+
     <tbody>
+
         <tr *ngFor="let client of clients">
             <td>{{ client.person.names }}</td>
             <td>{{ client.person.identification }}</td>
@@ -35,115 +37,87 @@
 
     </tbody>
 
-    <div id="create" class="modal" [ngClass]="{
-        'modalShow': state === 'new' || state === 'edit',
-        'modalHide': state === 'show' || state === 'delete'
-    }">
-
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close" (click)="modalHide()">&times;</span>
-            <div>
-                <h3>{{state==='edit'?'Editar usuario':'Crear usuario'}}</h3>
-                <br />
-                <form (ngSubmit)="save()" autocomplete="off" [formGroup]="miFormulario">
-
-                    <label for="names">Nombres</label>
-                    <div>
-                        <input type="text" formControlName="names" id="names" placeholder="Nombres">
-                        <span class="spanError"
-                            *ngIf="hasError('names')">
-                            Nombres es requerido y debe tener minimo 8 caractes
-                        </span>
-                    </div>
-
-                    
-                    <label for="gender">Genero</label>
-                    <div>
-                        <select formControlName="gender" id="gender">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
-                        </select>
-                        <span class="spanError"
-                            *ngIf="hasError('gender')">
-                            Genero es requerido
-                        </span>
-                    </div>
-
-                    <label for="age">Edad</label>
-                    <div>
-                        <input type="number" formControlName="age" placeholder="Edad">
-                        <span class="spanError"
-                            *ngIf="hasError('age')">
-                            Edad es requerida y mayor de 18 años y menor que 102 años
-                        </span>
-                    </div>
-
-                    <label>Identificación</label>
-                    <div>
-                        <input type="number" formControlName="identification" placeholder="Identificación">
-                        <span class="spanError"
-                            *ngIf="hasError('identification')">
-                            Identificación es requerida minimo 6 caracters
-                        </span>
-                    </div>
-
-                    <label >Teléfono</label>
-                    <div>
-                        <input type="number" formControlName="phone" placeholder="Teléfono">
-                        <span class="spanError"
-                            *ngIf="hasError('phone')">
-                            Teléfono es requerido minimo 7 caracters
-                        </span>
-                    </div>
-
-                    <label >Dirección</label>
-                    <div>
-                        <input type="text" formControlName="address" placeholder="Dirección">
-                        <span class="spanError"
-                            *ngIf="hasError('address')">
-                            Dirección es requerida
-                        </span>
-                    </div>
-
-                    <label >Clave</label>
-                    <div>
-                        <input type="password" formControlName="password" placeholder="Clave">
-                        <span class="spanError"
-                            *ngIf="hasError('password')">
-                            Clave es requerida y mayor de 7 caracteres
-                        </span>
-                    </div>
-
-                    <label for="status">Estado</label>
-                    <input type="checkbox" formControlName="status" placeholder="Estado">
-
-                    <input type="submit" value="Guardar">
-                </form>
-            </div>
-        </div>
-        
-
-    </div>
-    
-    <div id="delete" class="modal" [ngClass]="{
-        'modalShow': state === 'delete',
-        'modalHide': state !== 'delete'}">
-        <!-- Modal content -->
-        <div class="modal-content">
-            <div class="custom-alert">
-                <div class="custom-alert-title">
-                    <h2 >Confirmación</h2>
-                </div>
-                
-                <div class="custom-alert-body">
-                    <p>Está seguro de que quiere eliminar el cliente {{clientNames}}</p>
-                </div>   
-                <div class="custom-alert-buttons">
-                    <button class="button" (click)="modalHide()">Cancelar</button>
-                    <button class="button-primary" (click)="delete()">Aceptar</button> 
-                </div>             
-            </div>
-        </div>
-    </div>
 </table>
+
+<div id="create" class="modal" [ngClass]="{
+    'modalShow': state === 'new' || state === 'edit',
+    'modalHide': state === 'show' || state === 'delete'
+}">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close" (click)="modalHide()">&times;</span>
+        <div>
+            <h3>{{state==='edit'?'Editar usuario':'Crear usuario'}}</h3>
+            <br />
+            <form (ngSubmit)="save()" autocomplete="off" [formGroup]="miFormulario">
+
+                <label for="names">Nombres</label>
+                <div>
+                    <input class="input" type="text" formControlName="names" id="names" placeholder="Nombres">
+                    <span class="spanError" *ngIf="hasError('names')">
+                        Nombres es requerido y debe tener minimo 8 caractes
+                    </span>
+                </div>
+
+
+                <label for="gender">Genero</label>
+                <div>
+                    <select class="input" formControlName="gender" id="gender">
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                    <span class="spanError" *ngIf="hasError('gender')">
+                        Genero es requerido
+                    </span>
+                </div>
+
+                <label for="age">Edad</label>
+                <div>
+                    <input class="input" type="number" formControlName="age" placeholder="Edad">
+                    <span class="spanError" *ngIf="hasError('age')">
+                        Edad es requerida y mayor de 18 años y menor que 102 años
+                    </span>
+                </div>
+
+                <label>Identificación</label>
+                <div>
+                    <input class="input" type="number" formControlName="identification" placeholder="Identificación">
+                    <span class="spanError" *ngIf="hasError('identification')">
+                        Identificación es requerida minimo 6 caracters
+                    </span>
+                </div>
+
+                <label>Teléfono</label>
+                <div>
+                    <input class="input" type="number" formControlName="phone" placeholder="Teléfono">
+                    <span class="spanError" *ngIf="hasError('phone')">
+                        Teléfono es requerido minimo 7 caracters
+                    </span>
+                </div>
+
+                <label>Dirección</label>
+                <div>
+                    <input class="input" type="text" formControlName="address" placeholder="Dirección">
+                    <span class="spanError" *ngIf="hasError('address')">
+                        Dirección es requerida
+                    </span>
+                </div>
+
+                <label>Clave</label>
+                <div>
+                    <input class="input" type="password" formControlName="password" placeholder="Clave">
+                    <span class="spanError" *ngIf="hasError('password')">
+                        Clave es requerida y mayor de 7 caracteres
+                    </span>
+                </div>
+
+                <label for="status">Estado</label>
+                <input class="checkBox " type="checkbox" formControlName="status" placeholder="Estado">
+
+                <input class="input" type="submit" value="Guardar">
+            </form>
+        </div>
+    </div>
+</div>
+<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()" (accept)="delete()"></app-confirm>

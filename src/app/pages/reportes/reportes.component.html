@@ -1,1 +1,46 @@
-<p>reportes works!</p>
+<div>
+    <h2>Reportes</h2>
+    <input type="date" class="inputFilter" width="100px" placeholder="Fecha Inicial"
+        #filterStartDate (change)="loadReports()"/>
+    <input type="date" class="inputFilter" placeholder="Fecha Final"
+        #filterEndDate (change)="loadReports()"/>
+    <select class="inputFilter" #filterClient (change)="loadReports()">
+            <option *ngFor="let client of clients" value={{client.id}}>{{client.person.names}}</option>
+    </select>
+</div>
+<span class="spanError" #spanError></span>
+
+<div class="container-new">
+    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData" ></app-pdf>
+    <a class="json-btn" [href]="downloadUrl" download="{{filename}}.json">🗎 JSON</a>
+</div>
+
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Cuenta</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Saldo Inicial</th>
+            <th>Movimineto</th>
+            <th>Saldo Disponible</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr *ngFor="let report of reports">
+            <td>{{ report.date }}</td>
+            <td>{{ report.clientName }}</td>
+            <td>{{ report.accountId }}</td>
+            <td>{{ report.accountType }}</td>
+            <td>{{ report.accountInitialBalance }}</td>
+            <td>{{ report.transactionState }}</td>
+            <td>{{ report.transactionValue }}</td>
+            <td>{{ report.transactionResidue }}</td>
+        </tr>
+
+    </tbody>
+
+</table>
