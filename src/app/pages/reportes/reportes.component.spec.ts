@@ -57,7 +57,6 @@ describe('ReportesComponent', () => {
     fixture = TestBed.createComponent(ReportesComponent);
     reportService = fixture.debugElement.injector.get(ReportService);
     clientService = fixture.debugElement.injector.get(ClientService);
-    // httpTestingController = fixture.debugElement.injector.get(HttpTestingController);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
