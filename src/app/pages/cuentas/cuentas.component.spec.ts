@@ -2,10 +2,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { ConfirmComponent } from 'src/app/components/confirm/confirm.component';
 import { PdfComponent } from 'src/app/components/pdf/pdf.component';
-import { Account, AccountShow } from 'src/app/models/account.model';
+import { Account, AccountSave, AccountShow, ResponseGetAccount } from 'src/app/models/account.model';
 import { Client } from 'src/app/models/client.model';
+import { Response } from 'src/app/models/response.model';
 import { AccountService } from 'src/app/services/account.service';
 import { ClientService } from 'src/app/services/client.service';
 
@@ -17,7 +19,7 @@ describe('CuentasComponent', () => {
   let clientService: ClientService;
   let accountService: AccountService;
   let httpTestingController: HttpTestingController;
-  const fb = new FormBuilder();
+  let fb : FormBuilder;
 
 
   const client: Client = {
@@ -34,60 +36,82 @@ describe('CuentasComponent', () => {
       phone: '65835241'
     }
   }
-  const accountShow: AccountShow = {
-      id: 1,
-      accountNumber: '100001',
-      type: 'Ahorros',
-      initialBalance: 100000,
-      status: true,
-      clientId:1,
-      clientName:'Ronal Hoyos G',
-      clientIdentification:8888855,
-      balance:1010000
-    }
+  const accountSave: AccountSave = {
+    id: 1,
+    accountNumber: '1234156',
+    type: 'CORRIENTE',
+    initialBalance: 2065000.00,
+    status: true,
+    clientId: 1
+  }
 
-    const accouns: AccountShow[] = [
-      {
-        id: 1,
-        accountNumber: '100001',
-        type: 'Ahorros',
-        initialBalance: 100000,
-        status: true,
-        clientId:1,
-        clientName:'Ronal Hoyos G',
-        clientIdentification:8888855,
-        balance:1010000
-      },
-      {
-        id: 2,
-        accountNumber: '100002',
-        type: 'Corriente',
-        initialBalance: 20000,
-        status: true,
-        clientId:1,
-        clientName:'Ronal Hoyos G',
-        clientIdentification:8888855,
-        balance:30000
+
+  const account: Account = {
+    "id": 1,
+    "accountNumber": "1234156",
+    "type": "CORRIENTE",
+    "currentBalance": 2065000.00,
+    "initialBalance": 2200000.00,
+    "status": true,
+    "client": {
+      "id": 1,
+      "password": "supersecreta",
+      "status": true,
+      "person": {
+        "id": 1,
+        "names": "Ronal Hoyos",
+        "gender": "M",
+        "age": '40',
+        "identification": 21421615,
+        "address": "Bucaramanga",
+        "phone": "98763515"
       }
-    ]
+    }
+  }
+
+  const accouns: Account[] = [
+    {
+      "id": 1,
+      "accountNumber": "1234156",
+      "type": "CORRIENTE",
+      "currentBalance": 2065000.00,
+      "initialBalance": 2200000.00,
+      "status": true,
+      "client": {
+        "id": 1,
+        "password": "supersecreta",
+        "status": true,
+        "person": {
+          "id": 1,
+          "names": "Ronal Hoyos",
+          "gender": "M",
+          "age": '40',
+          "identification": 21421615,
+          "address": "Bucaramanga",
+          "phone": "98763515"
+        }
+      }
+    }
+  ]
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CuentasComponent, PdfComponent, ConfirmComponent ],
-      imports:[FormsModule, 
-        ReactiveFormsModule, 
-        HttpClientTestingModule, 
+      declarations: [CuentasComponent, PdfComponent, ConfirmComponent],
+      imports: [FormsModule,
+        ReactiveFormsModule,
+        HttpClientTestingModule,
         HttpClientModule],
-      providers:[AccountService, ClientService]
+      providers: [AccountService, ClientService]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(CuentasComponent);
+    fb = fixture.debugElement.injector.get(FormBuilder);
     clientService = fixture.debugElement.injector.get(ClientService);
     accountService = fixture.debugElement.injector.get(AccountService);
     httpTestingController = fixture.debugElement.injector.get(HttpTestingController);
     component = fixture.componentInstance;
-    
+
     fixture.detectChanges();
   });
 
@@ -184,16 +208,16 @@ describe('CuentasComponent', () => {
 
   it('Validar método showEdit', () => {
 
-    component.showEdit(accountShow);
+    component.showEdit(account);
     expect(component.state).toBe('edit');
-    expect(component.miFormulario.value.accountNumber).toEqual(accountShow.accountNumber);
+    expect(component.miFormulario.value.accountNumber).toEqual(accountSave.accountNumber);
 
   });
 
   it('Validar método showDelete', () => {
 
-    component.showDelete(accountShow);
-    expect(component.selectAccount).toBe(accountShow);
+    component.showDelete(account);
+    expect(component.state).toBe('delete');
 
   });
 
@@ -205,8 +229,15 @@ describe('CuentasComponent', () => {
   });
 
   it('loadClients: Debe de cargar las cuentas', () => {
+
     spyOn(accountService, 'getAccounts').and.callFake(() => {
-      return accouns;
+      const resp: ResponseGetAccount = {
+        "statusCode": 200, "message": 'Todo bien', "data": accouns
+      }
+      return new Observable(observer => {
+        observer.next(resp);
+        observer.complete();
+      })
     });
 
     component.loadAccounts('');
@@ -219,7 +250,13 @@ describe('CuentasComponent', () => {
   it('Debe de llamar al servidor para guardar una cuenta', () => {
 
     const spy = spyOn(accountService, 'saveAccount').and.callFake(() => {
-      return true;
+      return new Observable(observer => {
+        const resp: Response = {
+          "statusCode": 200, "message": 'Todo bien'
+        }
+        observer.next(resp);
+        observer.complete();
+      });
     });
 
     component.selectClient = client;
@@ -239,12 +276,18 @@ describe('CuentasComponent', () => {
 
   it('Debe de llamar al servidor para actualizar una cuenta', () => {
 
-    const spy = spyOn(accountService, 'updateAccount').and.callFake(accountShow => {
-      return true;
+    const spy = spyOn(accountService, 'updateAccount').and.callFake(accountSave => {
+      return new Observable(observer => {
+        const resp: Response = {
+          "statusCode": 200, "message": 'Todo bien'
+        }
+        observer.next(resp);
+        observer.complete();
+      });
     });
 
     component.selectClient = client;
-    component.showEdit(accountShow);
+    component.showEdit(account);
     component.state = 'edit';
     component.save();
 
@@ -254,11 +297,17 @@ describe('CuentasComponent', () => {
 
   it('Debe de llamar al servidor para eliminar una cuenta', () => {
 
-    const spy = spyOn(accountService, 'deleteAccount').and.callFake(accountShow => {
-      return true;
+    const spy = spyOn(accountService, 'deleteAccount').and.callFake(id => {
+      return new Observable(observer => {
+        const resp: Response = {
+          "statusCode": 200, "message": 'Todo bien'
+        }
+        observer.next(resp);
+        observer.complete();
+      });
     });
 
-    component.showDelete(accountShow);
+    component.showDelete(account);
     component.delete();
 
     expect(spy).toHaveBeenCalled();

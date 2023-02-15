@@ -6,7 +6,7 @@
 
 <div class="container-new">
     <button (click)="showNew()">Nueva Cuenta</button>
-    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData" ></app-pdf>
+    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData"></app-pdf>
 </div>
 
 <table class="styled-table">
@@ -30,10 +30,10 @@
             <td>{{ account.type }}</td>
             <td>{{ account.status?'True':'False' }}</td>
             <td>{{ account.initialBalance }}</td>
-            <td>{{ account.balance }}</td>
-            <td>{{ account.clientName }}</td>
-            <td>{{ account.clientIdentification }}</td>
-            
+            <td>{{ account.currentBalance }}</td>
+            <td>{{ account.client.person.names }}</td>
+            <td>{{ account.client.person.identification }}</td>
+
             <td>
                 <button class="btn-action" (click)="showEdit(account)">✏️</button>
                 <button class="btn-action" (click)="showDelete(account)">❌</button>
@@ -60,7 +60,7 @@
                 <label for="names">Cliente:*</label>
                 <div>
                     <select class="input" formControlName="clientId" (change)="changeClient()">
-                        <option *ngFor="let client of clients" [value]="client">{{client.person.names}}</option>
+                        <option *ngFor="let client of clients" [value]="client.id">{{client.person.names}}</option>
                     </select>
                     <span class="spanError" *ngIf="hasError('clientId')">
                         Cliente es requerido
@@ -78,8 +78,8 @@
                 <label for="type">Tipo:*</label>
                 <div>
                     <select class="input" formControlName="type" id="type">
-                        <option value="Ahorros">Ahorros</option>
-                        <option value="Corriente">Corriente</option>
+                        <option value="AHORROS">AHORROS</option>
+                        <option value="CORRIENTE">CORRIENTE</option>
                     </select>
                     <span class="spanError" *ngIf="hasError('type')">
                         Genero es requerido
@@ -98,8 +98,12 @@
                 <input class="checkBox " type="checkbox" formControlName="status" placeholder="Estado">
 
                 <input class="input" type="submit" value="Guardar">
+                <span class="spanError">
+                    {{saveError}}
+                </span>
             </form>
         </div>
     </div>
 </div>
-<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()" (accept)="delete()"></app-confirm>
+<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()"
+    (accept)="delete()"></app-confirm>

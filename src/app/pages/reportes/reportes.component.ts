@@ -16,56 +16,75 @@ import { Client } from 'src/app/models/client.model';
 })
 export class ReportesComponent implements OnInit {
 
-  public downloadUrl:any;
+  public downloadUrl: any;
   filename = "";
   datePipe = new DatePipe("es-CO");
   currentDate: string | null = '';
   public reports: Report[] = [];
-  public clients: Client[]= [];
+  public clients: Client[] = [];
   @ViewChild('filterStartDate') filterStartDate!: ElementRef;
   @ViewChild('filterEndDate') filterEndDate!: ElementRef;
   @ViewChild('filterClient') filterClient!: ElementRef;
   @ViewChild('spanError') spanError!: ElementRef;
 
-  reportTitle:string='Report';
-  reportHeaders=['Fecha','Cliente','Cuenta','Tipo','Estado','Saldo','Movimineto','Saldo Disponible'];
-  reportData:any;
-  reportFilters='';
-  
-  constructor(private reportService: ReportService, private clientSrvice: ClientService, private sanitizer: DomSanitizer) { }
+  reportTitle: string = 'Report';
+  reportHeaders = ['Fecha', 'Cliente', 'Cuenta', 'Tipo', 'Estado', 'Saldo', 'Movimineto', 'Saldo Disponible'];
+  reportData: any;
+  reportFilters = '';
+
+  constructor(private reportService: ReportService, private clientService: ClientService, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
-    this.clients = this.clientSrvice.getClients('');
+    this.loadClients();
+  }
+
+  loadClients() {
+    this.clientService.getClients('').
+      subscribe(resp => {
+        this.clients = resp.data;
+      });
   }
 
   loadReports() {
-    this.spanError.nativeElement.innerHTML ="";
-    if(this.filterStartDate.nativeElement.value ==='' ||  this.filterStartDate.nativeElement.value == null ||
-      this.filterEndDate.nativeElement.value ==='' || this.filterEndDate.nativeElement.value == null ||
-      this.filterClient.nativeElement.value ==='' || this.filterClient.nativeElement.value == null){
-      this.spanError.nativeElement.innerHTML ="Debes selecionar un rango de fechas y un cliente";
+    console.log('this.filterStartDate.nativeElement.value =>',this.filterStartDate.nativeElement.value);
+    console.log('this.filterEndDate.nativeElement.value =>',this.filterEndDate.nativeElement.value);
+    console.log('this.filterClient.nativeElement.value =>',this.filterClient.nativeElement.value);
+    this.spanError.nativeElement.innerHTML = "";
+    if (this.filterStartDate.nativeElement.value === '' || this.filterStartDate.nativeElement.value == null ||
+      this.filterEndDate.nativeElement.value === '' || this.filterEndDate.nativeElement.value == null ||
+      this.filterClient.nativeElement.value === '' || this.filterClient.nativeElement.value == null) {
+      this.spanError.nativeElement.innerHTML = "Debes selecionar un rango de fechas y un cliente";
       return;
     }
     const _startDate = new Date(this.filterStartDate.nativeElement.value).getTime();
     const _endDate = new Date(this.filterEndDate.nativeElement.value).getTime();
-    if(_startDate > _endDate){
-      this.spanError.nativeElement.innerHTML ="La fecha inicial no puede ser mayor que la fecha final";
+    if (_startDate > _endDate) {
+      this.spanError.nativeElement.innerHTML = "La fecha inicial no puede ser mayor que la fecha final";
       return;
     }
-    const startDate = this.datePipe.transform(this.filterStartDate.nativeElement.value, 'dd/MM/yyyy') || '01/01/2023';
-    const endDate = this.datePipe.transform(this.filterEndDate.nativeElement.value, 'dd/MM/yyyy') || '12/02/2023' ;
-    let filter:ReporFilter = {startDate:startDate,
-                              endDate:endDate,
-                              clientId:this.filterClient.nativeElement.value}
-    this.reports = this.reportService.getReports(filter);
-    this.reportFilters = ` \nFiltro: ${this.filterClient.nativeElement.test}\n FechaInicial: ${startDate}\n FechaFinal: ${endDate}`;
-    this.extractData();
-    this.generateJson();
+    const startDate = this.filterStartDate.nativeElement.value || '01/01/2023';
+    const endDate = this.filterEndDate.nativeElement.value || '12/02/2023';
+    let filter: ReporFilter = {
+      startDate: startDate,
+      endDate: endDate,
+      clientId: this.filterClient.nativeElement.value
+    }
+
+    this.reportService.getReports(filter).
+      subscribe(resp => {
+        this.reports = resp.data;
+        this.reportFilters = ` \nFiltro: ${this.filterClient.nativeElement.test}\n FechaInicial: ${startDate}\n FechaFinal: ${endDate}`;
+        this.extractData();
+        this.generateJson();
+      });
+
+
+
   }
 
   generateJson() {
-    this.filename = `EstadoCuenta-${this.datePipe.transform(new Date(),'dd-MM-yyyy-h:mm:ss')}`;
-    var data = JSON.stringify(this.reports,null,3);
+    this.filename = `EstadoCuenta-${this.datePipe.transform(new Date(), 'dd-MM-yyyy-h:mm:ss')}`;
+    var data = JSON.stringify(this.reports, null, 3);
     var url = this.sanitizer.bypassSecurityTrustUrl(
       "data:text/json;charset=UTF-8," + encodeURIComponent(data)
     );
@@ -73,7 +92,7 @@ export class ReportesComponent implements OnInit {
   }
 
   extractData() {
-    this.reportData = this.reports.map(row => [row.date, row.clientName, row.accountId, row.accountType, row.accountInitialBalance, row.transactionState, row.transactionValue, row.transactionResidue])
+    this.reportData = this.reports.map(row => [row.createdAt, row.clientName, row.accountNumber, row.accountType, row.accountInitialBalance, row.transactionState, row.transactionValue, row.transactionResidue])
   }
 
 }

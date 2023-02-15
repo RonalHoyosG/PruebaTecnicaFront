@@ -6,7 +6,7 @@
 
 <div class="container-new">
     <button (click)="showNew()">Nuevo Cliente</button>
-    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData" ></app-pdf>
+    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData"></app-pdf>
 </div>
 
 <table class="styled-table">
@@ -116,8 +116,12 @@
                 <input class="checkBox " type="checkbox" formControlName="status" placeholder="Estado">
 
                 <input class="input" type="submit" value="Guardar">
+                <span class="spanError">
+                    {{saveError}}
+                </span>
             </form>
         </div>
     </div>
 </div>
-<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()" (accept)="delete()"></app-confirm>
+<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()"
+    (accept)="delete()"></app-confirm>

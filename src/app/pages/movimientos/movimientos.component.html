@@ -1,17 +1,16 @@
 <div>
     <h2>Movimientos</h2>
-    <input type="date" class="inputFilter" width="100px" value="{{today | date:'yyyy-MM-dd'}}" placeholder="Fecha Inicial"
-        #filterStartDate (change)="loadTransactions()"/>
+    <input type="date" class="inputFilter" width="100px" value="{{today | date:'yyyy-MM-dd'}}"
+        placeholder="Fecha Inicial" #filterStartDate (change)="loadTransactions()" />
     <input type="date" class="inputFilter" value="{{today | date:'yyyy-MM-dd'}}" placeholder="Fecha Final"
-        #filterEndDate (change)="loadTransactions()"/>
-        <input class="inputFilter" type="text" placeholder="Buscar" (keyup.enter)="this.loadTransactions()"
-        #txtFilter />
+        #filterEndDate (change)="loadTransactions()" />
+    <input class="inputFilter" type="text" placeholder="Buscar" (keyup.enter)="this.loadTransactions()" #txtFilter />
 </div>
 <span class="spanError" #spanError></span>
 
 <div class="container-new">
     <button (click)="showNew()">Nuevo Movimiento</button>
-    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData" ></app-pdf>
+    <app-pdf title="{{reportTitle}}" [headers]="reportHeaders" [filters]="reportFilters" [data]="reportData"></app-pdf>
 </div>
 
 <table class="styled-table">
@@ -32,13 +31,13 @@
     <tbody>
 
         <tr *ngFor="let transaction of transactions">
-            <td>{{ transaction.date }}</td>
+            <td>{{ transaction.created_at }}</td>
             <td>{{ transaction.type }}</td>
-            <td>{{ transaction.accountNumber }}</td>
+            <td>{{ transaction.account.accountNumber }}</td>
             <td>{{ transaction.value }}</td>
-            <td>{{ transaction.residue }}</td>
-            <td>{{ transaction.clientName }}</td>
-            <td>{{ transaction.clientIdentification }}</td>
+            <td>{{ transaction.balance }}</td>
+            <td>{{ transaction.account.client.person.names }}</td>
+            <td>{{ transaction.account.client.person.identification }}</td>
             <td>{{ transaction.status?'True':'False' }}</td>
             <td>
                 <button class="btn-action" (click)="showEdit(transaction)">✏️</button>
@@ -66,7 +65,8 @@
                 <label for="accountId">Cuenta:*</label>
                 <div>
                     <select class="input" formControlName="accountId" (change)="changeAccount()">
-                        <option *ngFor="let account of accounts" [value]="account.id">{{account.accountNumber}} - {{account.clientName}}</option>
+                        <option *ngFor="let account of accounts" [value]="account.id">{{account.accountNumber}} -
+                            {{account.client.person.names}}</option>
                     </select>
                     <span class="spanError" *ngIf="hasError('accountId')">
                         Cuenta es requerida
@@ -76,8 +76,8 @@
                 <label for="type">Tipo:*</label>
                 <div>
                     <select class="input" formControlName="type" id="type">
-                        <option value="Retiro">Retiro</option>
-                        <option value="Depósito">Depósito</option>
+                        <option value="RETIRO">RETIRO</option>
+                        <option value="DEPOSITO">DEPÓSITO</option>
                     </select>
                     <span class="spanError" *ngIf="hasError('type')">
                         Tipo es requerido
@@ -96,8 +96,12 @@
                 <input class="checkBox " type="checkbox" formControlName="status" placeholder="Estado">
 
                 <input class="input" type="submit" value="Guardar">
+                <span class="spanError">
+                    {{saveError}}
+                </span>
             </form>
         </div>
     </div>
 </div>
-<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()" (accept)="delete()"></app-confirm>
+<app-confirm [visible]="state==='delete'" [message]="confirmMessage" (cancel)="modalHide()"
+    (accept)="delete()"></app-confirm>

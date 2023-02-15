@@ -1,89 +1,20 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ReporFilter, Report } from '../models/report.model';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { ReporFilter, Report, ResponseGetReport } from '../models/report.model';
+
+const base_url = environment.base_url;
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
 
-  public reports:Report[] = [
-    {
-      date:'01/02/2023',
-      clientId:'1', 
-      clientName:'Ronal Hoyos G', 
-      accountId:'100001', 
-      accountType:'Ahorros', 
-      accountInitialBalance:1000000, 
-      transactionState:true, 
-      transactionValue:10000, 
-      transactionResidue:1010000, 
-    },
-    {
-      date:'01/02/2023',
-      clientId:'1', 
-      clientName:'Ronal Hoyos G', 
-      accountId:'100002', 
-      accountType:'Corriente', 
-      accountInitialBalance:200000, 
-      transactionState:true, 
-      transactionValue:10000, 
-      transactionResidue:210000, 
-    },
-    {
-      date:'02/02/2023',
-      clientId:'1', 
-      clientName:'Ronal Hoyos G', 
-      accountId:'100001', 
-      accountType:'Ahorros', 
-      accountInitialBalance:1000000, 
-      transactionState:true, 
-      transactionValue:20000, 
-      transactionResidue:1030000, 
-    },
-    {
-      date:'03/02/2023',
-      clientId:'1', 
-      clientName:'Ronal Hoyos G', 
-      accountId:'100001', 
-      accountType:'Ahorros', 
-      accountInitialBalance:1000000, 
-      transactionState:true, 
-      transactionValue:-20000, 
-      transactionResidue:1010000, 
-    },
-    {
-      date:'01/02/2023',
-      clientId:'2', 
-      clientName:'Jose Torres', 
-      accountId:'100002', 
-      accountType:'Ahorros', 
-      accountInitialBalance:20000, 
-      transactionState:true, 
-      transactionValue:10000, 
-      transactionResidue:30000, 
-    },
-    {
-      date:'03/02/2023',
-      clientId:'2', 
-      clientName:'Jose Torres', 
-      accountId:'100002', 
-      accountType:'Ahorros', 
-      accountInitialBalance:20000, 
-      transactionState:true, 
-      transactionValue:50000, 
-      transactionResidue:80000, 
-    },
-  ]
+  constructor(public http: HttpClient) { }
 
-  constructor() { }
-
-  search(item: Report, filter: ReporFilter) {
-    return (item.date>=filter.startDate && 
-            item.date<=filter.endDate && 
-            String(item.clientId)==filter.clientId)? true : false
-  }
-
-  getReports(filter:ReporFilter): Report[]{
-    return this.reports.filter(item => this.search(item, filter))
+  getReports(filter: ReporFilter): Observable<ResponseGetReport> {
+    const url = `${base_url}/reportes/obtener?fechaInicio=${filter.startDate}&fechaFin=${filter.endDate}&clientId=${filter.clientId}`;
+    return this.http.get<ResponseGetReport>(url);
   }
 }

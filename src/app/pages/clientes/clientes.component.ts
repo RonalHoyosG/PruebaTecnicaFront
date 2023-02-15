@@ -3,6 +3,8 @@ import { Client } from 'src/app/models/client.model';
 import { ClientService } from 'src/app/services/client.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { Response } from 'src/app/models/response.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-clientes',
@@ -26,31 +28,33 @@ export class ClientesComponent implements OnInit {
   public selectClient!: Client;
   public clientNames: string = '';
   public confirmMessage: string = '';
+  public saveError: string = '';
 
   public state: 'show' | 'new' | 'edit' | 'delete' = 'show';
   datePipe = new DatePipe("es-CO");
   currentDate: string | null = '';
 
-  reportTitle:string='Clientes';
-  reportHeaders=['Nombres', 'Identificación', 'Dirección', 'Phone', 'Edad', 'Estatus'];
-  reportData:any;
-  reportFilters='';
+  reportTitle: string = 'Clientes';
+  reportHeaders = ['Nombres', 'Identificación', 'Dirección', 'Phone', 'Edad', 'Estatus'];
+  reportData: any;
+  reportFilters = '';
 
   @ViewChild('txtFilter') txtFilter!: ElementRef;
 
   ngOnInit(): void {
     this.loadClients('');
-    let demo = this.clientService.getDemoTest().
-    subscribe(resp => {
-      console.log(resp);
-    });
-    
   }
 
   loadClients(filter: string) {
-    this.clients = this.clientService.getClients(filter);
-    this.reportFilters = ` \nFiltro: ${filter}\n`;
-    this.extractData();
+    this.saveError = '';
+    this.miFormulario.reset();
+    this.state = 'show';
+    this.clientService.getClients(filter).
+      subscribe(resp => {
+        this.clients = resp.data;
+        this.reportFilters = ` \nFiltro: ${filter}\n`;
+        this.extractData();
+      });
   }
 
   showNew() {
@@ -65,10 +69,6 @@ export class ClientesComponent implements OnInit {
       password: '',
       status: false,
     })
-  }
-
-  demoTest(){
-    this.clientService.getDemoTest();
   }
 
   showEdit(client: Client) {
@@ -90,7 +90,7 @@ export class ClientesComponent implements OnInit {
     this.state = 'delete';
     this.selectClient = client;
     this.clientNames = client.person.names;
-    this.confirmMessage='¿Está seguro de que quiere eliminar el cliente '+this.clientNames+'?';
+    this.confirmMessage = '¿Está seguro de que quiere eliminar el cliente ' + this.clientNames + '?';
   }
 
   modalHide() {
@@ -109,12 +109,10 @@ export class ClientesComponent implements OnInit {
     }
 
     if (this.state === 'new') {
-      this.selectClient = {
-        id: Math.floor(Math.random() * 999999),
+      let newClient = {
         password: this.miFormulario.value.password,
         status: this.miFormulario.value.status,
         person: {
-          id: Math.floor(Math.random() * 999999),
           names: this.miFormulario.value.names,
           gender: this.miFormulario.value.gender,
           age: this.miFormulario.value.age,
@@ -123,7 +121,14 @@ export class ClientesComponent implements OnInit {
           phone: this.miFormulario.value.phone
         }
       }
-      this.clientService.saveClient(this.selectClient);
+      newClient = newClient as Client;
+      this.clientService.saveClient(newClient)
+        .subscribe(resp => {
+          this.loadClients(this.txtFilter.nativeElement.value);
+        }, (error: HttpErrorResponse) => {
+          console.log(error.error.message);
+          this.saveError = error.error.message;
+        })
     }
     if (this.state === 'edit') {
       this.selectClient.password = this.miFormulario.value.password;
@@ -134,17 +139,24 @@ export class ClientesComponent implements OnInit {
       this.selectClient.person.identification = this.miFormulario.value.identification;
       this.selectClient.person.address = this.miFormulario.value.address;
       this.selectClient.person.phone = this.miFormulario.value.phone;
-      this.clientService.updateClient(this.selectClient);
+
+      this.clientService.updateClient(this.selectClient)
+        .subscribe(resp => {
+          this.loadClients(this.txtFilter.nativeElement.value);
+        }, (error: HttpErrorResponse) => {
+          this.saveError = error.error.message;
+        })
     }
-    this.miFormulario.reset();
-    this.state = 'show';
-    this.loadClients(this.txtFilter.nativeElement.value);
+
   }
 
   delete() {
-    this.clientService.deleteClient(this.selectClient.id);
-    this.state = 'show';
-    this.loadClients(this.txtFilter.nativeElement.value);
+    this.clientService.deleteClient(this.selectClient.id || 0)
+      .subscribe(resp => {
+        this.loadClients(this.txtFilter.nativeElement.value);
+      }, (error: HttpErrorResponse) => {
+        this.saveError = error.error.message;
+      })
   }
 
   extractData() {

@@ -1,31 +1,25 @@
 import { Account } from "./account.model";
 
-export class Transactions {
+export class Transaction {
     constructor(
-        public id: number,
-        public date: string,
+        public created_at: string,
         public type: string,
-        public accountId: number,
         public value: number,
-        public residue: number,
         public status: boolean,
-        
-    ){}
+        public account: Account,
+        public balance?: number,
+        public id?: number
+    ) { }
 }
 
-export class TransactionsShow {
+export class TransactionsSave {
     constructor(
-        public id: number,
-        public date: string,
-        public type: string,
         public accountId: number,
-        public accountNumber: Number,
+        public type: string,
         public value: number,
-        public residue: number,
         public status: boolean,
-        public clientName: string,
-        public clientIdentification: number
-    ){}
+        public id?: number
+    ) { }
 }
 
 export class TransactionsFilter {
@@ -33,6 +27,14 @@ export class TransactionsFilter {
         public filter: string,
         public startDate: string,
         public endDate: string,
-        
-    ){}
+
+    ) { }
+}
+
+export class ResponseGetTransactions {
+    constructor(
+        public statusCode: number,
+        public message: string,
+        public data: Transaction[]
+    ) { }
 }

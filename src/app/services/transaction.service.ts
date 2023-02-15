@@ -1,84 +1,36 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { TransactionsFilter, TransactionsShow } from '../models/transaction.model';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { Response } from '../models/response.model';
+import { ResponseGetTransactions, TransactionsFilter, TransactionsSave } from '../models/transaction.model';
+
+const base_url = environment.base_url;
 
 @Injectable({
   providedIn: 'root'
 })
 export class TransactionService {
 
-  public transactions:TransactionsShow[] = [
-    {
-      id: 1,
-      date: '01/02/2023',
-      type: 'Depósito',
-      accountId: 1,
-      accountNumber: 100001,
-      value: 100000,
-      residue: 1100000,
-      status: true,
-      clientName: 'Ronal Hoyos G',
-      clientIdentification: 8888855
-    },
-    {
-      id: 2,
-      date: '01/02/2023',
-      type: 'Retiro',
-      accountId: 1,
-      accountNumber: 100001,
-      value: -100000,
-      residue: 1100000,
-      status: true,
-      clientName: 'Ronal Hoyos G',
-      clientIdentification: 8888855
-    },
-    {
-      id: 3,
-      date: '02/02/2023',
-      type: 'Depósito',
-      accountId: 2,
-      accountNumber: 100002,
-      value: 200000,
-      residue: 230000,
-      status: true,
-      clientName: 'Ronal Hoyos G',
-      clientIdentification: 8888855
-    },
-    
-  ]
+  constructor(public http: HttpClient) { }
 
-  constructor() { }
-
-  search(item: TransactionsShow, filter: TransactionsFilter) {
-    return (
-      item.date >= filter.startDate &&
-      item.date <= filter.endDate && ((filter.filter.length==0)?true:
-        (item.clientName.toLowerCase().indexOf(filter.filter.toString().toLowerCase()) > -1
-        ||
-        item.clientIdentification.toString().indexOf(filter.filter.toString().toLowerCase()) > -1
-        ||
-        item.accountNumber.toString().indexOf(filter.filter.toString().toLowerCase()) > -1)
-      )
-    ) ? true : false;
+  getTrasactions(filter: TransactionsFilter): Observable<ResponseGetTransactions> {
+    const url = `${base_url}/movimientos/obtener?fechaInicio=${filter.startDate}&fechaFin=${filter.endDate}&filtro=${filter.filter}`;
+    return this.http.get<ResponseGetTransactions>(url);
   }
 
-  getTrasactions(filter:TransactionsFilter): TransactionsShow[]{
-    return this.transactions.filter(item => this.search(item, filter))
+  saveTrasaction(transaction: TransactionsSave): Observable<Response> {
+    const url = `${base_url}/movimientos/crear`;
+    return this.http.post<Response>(url, transaction);
   }
 
-  saveTrasaction(transaction:TransactionsShow){
-    this.transactions.push({...transaction});
+  updateTrasaction(transaction: TransactionsSave): Observable<Response> {
+    const url = `${base_url}/movimientos/actualizar`;
+    return this.http.put<Response>(url, transaction);
   }
 
-  /*TODO se debe cambiar la clase transactionsShow cuando se tetenga el back*/
-  updateTrasaction(transaction:TransactionsShow){
-    this.transactions = this.transactions.map((item) => {
-      return (item.id===transaction.id)? transaction:item;
-    });
-  }
-  
-  deleteTrasaction(id:number){
-    this.transactions = this.transactions.filter((item) => {
-      return item.id!==id;
-    });
+  deleteTrasaction(id: number) {
+    const url = `${base_url}/movimientos/eliminar/${id}`;
+    return this.http.delete<Response>(url);
   }
 }

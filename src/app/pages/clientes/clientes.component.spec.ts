@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Client } from 'src/app/models/client.model';
+import { Client, ResponseGetClient } from 'src/app/models/client.model';
 
 import { Observable, EMPTY } from 'rxjs';
 
@@ -11,6 +11,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { PdfComponent } from 'src/app/components/pdf/pdf.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ConfirmComponent } from 'src/app/components/confirm/confirm.component';
+import { Response } from 'src/app/models/response.model';
 
 describe('ClientesComponent', () => {
   let component: ClientesComponent;
@@ -18,6 +19,18 @@ describe('ClientesComponent', () => {
   let clientService: ClientService;
   let httpTestingController: HttpTestingController;
   const fb = new FormBuilder();
+
+
+
+  const responseObservableResponse = new Observable(observer => {
+    const resp: Response = {
+      "statusCode": 200, "message": 'Todo bien'
+    }
+    observer.next(resp);
+    observer.complete();
+  })
+
+
 
   const client: Client = {
     id: 1,
@@ -248,9 +261,15 @@ describe('ClientesComponent', () => {
   });
 
   it('loadClients: Debe de cargar los clientes', () => {
+    const resp: ResponseGetClient = {
+      "statusCode": 200, "message": 'Todo bien', "data": clients
+    }
     component = new ClientesComponent(fb, clientService);
     spyOn(clientService, 'getClients').and.callFake(() => {
-      return clients;
+      return new Observable(observer => {
+        observer.next(resp);
+        observer.complete();
+      })
     });
 
     component.loadClients('');
@@ -263,8 +282,14 @@ describe('ClientesComponent', () => {
 
   it('Debe de llamar al servidor para guardar un cliente', () => {
 
-    const spy = spyOn(clientService, 'saveClient').and.callFake(() => {
-      return true;
+    const spy = spyOn(clientService, 'saveClient').and.callFake((client: Client) => {
+      return new Observable(observer => {
+        const resp: Response = {
+          "statusCode": 200, "message": 'Todo bien'
+        }
+        observer.next(resp);
+        observer.complete();
+      });
     });
 
     component.miFormulario.reset({
@@ -287,7 +312,13 @@ describe('ClientesComponent', () => {
   it('Debe de llamar al servidor para actualizar un cliente', () => {
 
     const spy = spyOn(clientService, 'updateClient').and.callFake(client => {
-      return true;
+      return new Observable(observer => {
+        const resp: Response = {
+          "statusCode": 200, "message": 'Todo bien'
+        }
+        observer.next(resp);
+        observer.complete();
+      });
     });
 
     component.showEdit(client);
@@ -301,7 +332,13 @@ describe('ClientesComponent', () => {
   it('Debe de llamar al servidor para eliminar un cliente', () => {
 
     const spy = spyOn(clientService, 'deleteClient').and.callFake(client => {
-      return true;
+      return new Observable(observer => {
+        const resp: Response = {
+          "statusCode": 200, "message": 'Todo bien'
+        }
+        observer.next(resp);
+        observer.complete();
+      });
     });
 
     component.showDelete(client);
@@ -311,15 +348,4 @@ describe('ClientesComponent', () => {
 
   });
 
-  it('Debe de llamar al servidor getDemoTest', () => {
-
-    const spy = spyOn(clientService, 'getDemoTest').and.callFake(() => {
-      return EMPTY;
-
-      component.demoTest();
-
-      expect(spy).toHaveBeenCalled();
-
-    });
-  });
 });
